@@ -795,11 +795,344 @@ YYYY: 4자리 숫자 연도
 YY: 2자리 연도(2000년도)
 RR: 2자리 연도(1900년도)
 YEAR: 영어로 표시한 연도.
+
 MM: 숫자로 된 월 EX) 12
 MONTH: 달이름. 영어: June, 한국어: 6월
 MON: 3자리 약어, 영어: JUN, 한국어: 6월
-Day: 요일(영어: MONDAY, 한국어: 월요일)
-DY: 3자리 약어(영어: MON, 한국어 월)
-HH24: 숫자로된 시간(24시간 표기법)
+
+DD : 숫자로 된 달의 일
+DAY : 요일(영어 : MONDAY, 한국어 : 월요일)
+DY : 3자리 약어 (영어 : MON, 한국어 : 월)
+
+HH24 : 숫자로 된 시간 (24시간 표기법)
+HH, HH12 : 숫자로 된 시간 (12시간 표기법)
+MI : 숫자로 된 분
+SS : 숫자로 된 초
+AM : 오전/오후 (영어 : AM/PM, 한국어 : 오전/오후)
 
 */
+
+/* 숫자 형식 표현
+9(또는 0): 자리 수: 999,999: 숫자를 최대 만 단위까지 표현
+0:자리수: 099,999: 사용되지 앟는 자리를 0으로 채워라.
+$:달러: $99,999: 숫자앞에 $를 표시한다.
+L 지역 화폐: L999,999 해당 지역 통화 단위를 앞에 표시
+. 소수점 : 999.99 소수점을 의미
+, 천 단위 구분자 : 99,999 숫자에 천 단위 구분자를 표시
+*/
+
+-- 데이터 변환 함수
+--TO_DATE('날짜 문자열, '날짜 형식 모델'[, 'NLS_PARAM']) 함수
+--날짜처럼 표시된 문자 값에 해당한는 형식 모델을 명시하여,
+--문자 값을 날짜데이터 유형으로 반환한다.
+--'01-SEP-95' 날짜와 '1994/01/11' 날짜 사이의 달 수를 구하라
+--MONTHS_BETWEEN() 함수 사용
+--날짜-시간 상수를 명시하는 경우 TO_DATE 처리를 해야
+--세션의 표시 형식에 관계없이 정상적인 결과를 얻을 수 있다.
+--'01-SEP-95'날짜와 '1994/01/11'날짜 사이의 달수를 구하시오.
+SELECT
+MONTHS_BETWEEN
+       (TO_DATE('1995/09/11','YYYY/MM/DD'),
+        TO_DATE('1994/01/11','YYYY/MM/DD') ) AS "RESULT"
+FROM DUAL;
+--TO_ CHAR(숫자형식)', '날짜 또는 숫자 형식', 날짜 또는 숫자 형식 모델)
+--SYSTDATE 함수 처리 결과를 세션의 표시 형식이 아닌 사용자가
+
+SELECT SYSDATE, TO_CHAR(SYSDATE, 
+'YYYY/MON/DD HH24:MI:SS AM DAY')
+FROM DUAL;
+
+SELECT TO_CHAR(SYSDATE, 'YYYY"년" MM"월" DD"일" HH"시" MI"분 "SS"초 "AM DAY') AS 날짜
+FROM DUAL;
+
+SELECT TO_CHAR(SYSDATE, 'YYYY-mON-DD,') AS 날짜
+FROM DUAL;
+
+--첫번째 글자가 소문자 : 전체가 소문자로 출력됨.
+--첫번째 글자가 대문자, 두번째 글자도 대문자 : 전부 대문자출력
+--첫번째 글자가 대문자, 두번째 글자는 소문자 : 
+--      첫글자만 대문자, 나머지 소문자.
+--숫자로 표시되는 년,월,일,시간,분,초 에서 한자리만 사용하는 경우
+--남은 자리는 0[ZERO]로 채운다.(예. 2021/06/08 ...)
+--fm을 명시하면 0으로 채우지 않는다.
+SELECT TO_CHAR(SYSDATE, 'fmYYYY-MM-DD FMhh:MI:SS')
+FROM DUAL;
+
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD hh:MI:SS')
+FROM DUAL;
+
+-SP옵션(숫자를 영문으로표시), TH옵션(숫자를 영어의 TH형으로 표시)
+SELECT TO_CHAR(SYSDATE, 'yYyySP-Mmspth-DDspth')
+FROM DUAL;
+
+--EMP에서 SAL 컬럼 값에 $ 또는 언화로 숫자 천단위에 , 표시
+SELECT ENAME, TO_CHAR(SAL, '$9,999.99'), TO_CHAR(SAL*1200, 'L9,999,999.99')
+FROM EMP;
+
+--MI(음수일 때-를 뒤에 표시), PR(음수의 절댓값을 <>로 감싼다)
+--MI, PR 동시 사용 불가.
+Select to_char(0-SAL, '99,999.99MI'),
+        to_char(0-SAL, '99,999.99PR')
+FROM EMP
+WHERE EMPNO=7839;
+
+--9, 0 형식 모델 사용시 표시 결과의 차이
+--0을 넣으면 비어잇는 자리수는 0으로 채워라
+
+SELECT TO_CHAR(SAL, '$999,999,999.99'),
+    TO_CHAR(SAL, '$099,999,999.99')
+FROM EMP
+WHERE EMPNO = 7839;
+
+--9로 지정한 자리수 작으면 ########로 표시됨..
+SELECT TO_CHAR(SAL, '$999,999,999.99'),
+    TO_CHAR(SAL, '$099,999,999.99')
+FROM EMP
+WHERE EMPNO = 7839;
+
+SELECT
+    TO_CHAR(SYSDATE, 'YYYY'),
+    TO_CHAR(SYSDATE, 'MM'),
+    TO_CHAR(SYSDATE, 'DD'),
+    TO_CHAR(SYSDATE, 'DAY'),
+    TO_CHAR(SYSDATE, 'HH24:MI:SS')
+FROM DUAL;
+
+--TO_NUMBR('숫자 문자열', '숫자형식 모델') 함수
+-- 명시된 숫자 문자열을 숫자 데이터형으로 변환
+--'$12,000' 문자열 값에 0.1을 곱한 값을 표시하시오.
+SELECT TO_NUMBER('$12,000',  '$999,999') *0.1 AS RESULT
+FROM DUAL;
+
+--단일행 함수의 중첩: 제한 없이 여러분 중첩 가능
+--EMP에서 DEPTNO30인 사원의 이름을 소문자로 변경해서
+--이름 끝에 _사원을 붙여서 출력해보자.
+
+SELECT ENAME, INITCAP(CONCAT(SUBSTR(ENAME,1,3), 'MAN'))
+FROM EMP
+WHERE DEPTNO=30;
+
+--일반 함수(GENERAL FUNCTION)
+--NVL(), DECODE(), CASE표현식, NVL2(), NULLIF(), COALESCE() 등등...
+--NVL(컬럼명, 대체값) 함수
+
+SELECT ENAME, SAL, COMM, SAL*12 AS 연봉1,
+        SAL*12+NVL(COMM,100) AS 연봉2
+FROM EMP
+WHERE COMM IS NULL;
+
+--DECODE(컬럼, 값1, 표현식1, ..., 값N, 표현식N) 함수
+--오라클에만 있음
+
+SELECT ENAME,JOB,SAL,DECODE(JOB, 'CLERK', 1.20*SAL, 'SALESMAN', 1.10*SAL, 'MANAGER', 0.95*SAL, SAL) AS 연봉인상
+FROM EMP
+WHERE JOB IN ('CLERK', 'SALESMAN', 'MANAGER')
+ORDER BY JOB;
+
+
+--case 표현식 대부분의 DB에서 지원한다. 
+SELECT ENAME,JOB,SAL,(CASE JOB WHEN 'CLERK' THEN 1.20*SAL WHEN 'SALESMAN' THEN 1.10*SAL WHEN 'MANAGER' THEN 0.95*SAL ELSE SAL END) AS 연봉인상
+FROM EMP
+WHERE JOB IN ('CLERK', 'SALESMAN', 'MANAGER')
+ORDER BY JOB;
+
+--EXTENDED CASE EXPRESSION
+
+SELECT ENAME, SAL, (CASE WHEN SAL <1000 THEN 'Low' WHEN SAL<2500 THEN 'MEDIUM' WHEN SAL<5500 THEN 'GOOD' ELSE 'EXCELLENT' END) AS 급여등급
+FROM EMP
+ORDER BY SAL;
+
+--NVL2(컬럼 이름, 대체값1, 대체값2) 함수(9I부터 지원)
+-- 컬럼의 데이터가 존재하면 대체값1, 컬럼이 NULL이면 대체값2
+-- 대체값1, 대체값2가 같은 데이터 유형이어야 한다.
+Select ENAME, COMM, NVL2(COMM, 'OK', 'NO') AS 커미션유무
+FROM EMP;
+
+
+--NULLIF(컬럼1, 컬럼2) 함수 (9i부터 지원)
+--컬럼1, 컬럼2의 값이 다르면, 무조건 컬럼1을 표시하고,
+--두 값이 값으면 NULL을 반환한다. 두 컬럼의 데이터유형은 동일
+
+SELECT
+ENAME, LENGTH(ENAME) AS EXP1, JOB, LENGTH(JOB) AS EXP2, NULLIF(LENGTH(ENAME), LENGTH(JOB)) AS RESULT
+FROM EMP;
+
+--coalesce(컬럼exp1, 컬럼exp2, ..., 컬럼expn) 함수
+--함수 내에 명시된 컬럼 값을 확인해서 최초로 null이 아닌
+--컬림 expr의 값을 표시
+
+SELECT
+COALESCE('A', 'B', 'C')
+COALESCE(NULL, 'B', 'C')
+COALESCE(NULL, NULL, 'C')
+COALESCE(NULL, NULL, NULL)
+FROM DUAL;
+
+--다중행 함수(MULTIPLE-ROW FUNCTION, GROUP FUNCTION)
+--SUM(), AVG(), MAX(), MIN(), COUNT()
+--VARIANCE: 분산 
+--STDDEV(): 표준편차
+
+--COUNT():행의 수를 계산
+
+SELECT
+COUNT(COMM) AS R1, COUNT(NVL(COMM, 0))AS R2
+FROM EMP;
+
+SELECT AVG(SAL) AS 평균급여, ROUND(AVG(SAL)) AS 평균급여
+FROM EMP;
+
+-- SUM(): 컬럼의 합계를 구한다.
+SELECT
+SUM(SAL) AS "급여총액"
+FROM EMP;
+
+--MAX():최댓값, MIN():최솟값
+SELECT  MAX(HIREDATE), MIN(HIREDATE)
+FROM EMP;
+
+--10번, 20번 부서에 근무하는 직원의 부서별 평균 급여를 구해보자
+
+SELECT 10 AS DEPTNO, AVG(SAL) AS 평균급여
+FROM EMP
+WHERE DEPTNO=10
+UNION ALL -- 두 개의 SELECT문을 처리한 결과를 합쳐서 표현
+SELECT 20, AVG(SAL)
+FROM EMP
+WHERE DEPTNO=20;
+
+SELECT DEPTNO, ROUND(AVG(SAL))
+FROM EMP
+GROUP BY DEPTNO;
+
+--둘 이 상 컬럼의 GROUP BY절 
+--EMP DEPTNO 30인 행들의 부서번호, JOB, SAL
+SELECT JOB DEPTNO, JOB, SAL
+FROM EMP
+ORDER BY 1, 2;
+
+SELECT DEPTNO, JOB, AVG(SAL) AS AVGSAL, COUNT(*) AS PERSON
+FROM EMP
+WHERE DEPTNO = 30
+GROUP BY DEPTNO, JOB;
+
+/* GROUP BY 절의 주의점 AVG
+SELECT COL1, COL2, ... COLN, AVG(COLX)
+FROM TABLENAME
+GROUP BY COL1, COL2, ... COLN
+SELECT절에 명시된 모든 COL은 GROUP BY절에서도 명시돼야 한다.
+*/
+
+
+SELECT
+DEPTNO, JOB, AVG(SAL), COUNT(*)
+FROM EMP
+WHERE DEPTNO IN(10, 20, 30)
+GROUP BY DEPTNO, JOB
+ORDER BY 1,2;
+
+SELECT DEPTNO, COUNT(ENAME)
+FROM EMP
+GROUP BY DEPTNO;
+
+
+
+-- SA가 포함된 직책에 대해서 부서별 임금으 ㅣ합계, 평균임금, 근무 인원수를 구해보자.
+SELECT SUM(SAL), ROUND(AVG(SAL)), COUNT(*)
+FROM EMP
+WHERE JOB LIKE 'SA%'
+GROUP BY DEPTNO;
+
+
+
+-- 부서별 임금의 합계가 7000보다 큰 부서에 대해서만 임금의 합계를 
+SELECT DEPTNO, SUM(SAL), ROUND(AVG(SAL)), COUNT(*)
+FROM EMP
+GROUP BY DEPTNO
+HAVING SUM(SAL) > 7000
+ORDER BY DEPTNO; 
+
+
+---그룹 함수의 중첩은 2번까지만 가능..
+
+-- EMP에 부서별 임금합계 중 가장 큰 부서를 구하시오
+SELECT MAX(SUM(SAL)) AS 총급여가가장높은부서
+FROM EMP
+GROUP BY DEPTNO;
+
+SELECT ENAME, MAX(SAL)
+FROM EMP
+GROUP BY ENAME, SAL;
+
+
+/*
+3개의 유니크한 키
+1. 기본키: 테이블을 대표하는 키 EMP 테이블: EMPNO, DEPT: DEPTNO
+2. 외래키: 다른 테이블의 기본키 EMP테이블: DEPTNO
+3. 슈퍼키: 유니크한 성질을 같는 PRIMARY KEY 후보 
+*/
+
+SELECT  DEPTNO, MAX(SAL)
+FROM EMP
+GROUP BY DEPTNO;
+
+/*
+JOIN: 조건을 디준으로 두 테이블의 가 행들을 합친후, 원하는 데이터 레코드를 가져오는 방법이다.
+1. INNER JOIN - EQUI-INNER JOIN NON-EQUI INNER JOIN
+2. OUTER JOIN
+3. CROSS JOIN 
+*/
+-- 조건에 '=' 연산자를 사용한다.
+-- EMP, DEPT 테이블을 이용해서 조인을 해보자.
+-- 사원의 사번, 이름, 부서명을 조회해서 출력
+-- 조건이 명시되지 않아서 가능한 모든 표현이 리턴됨. 
+
+SELECT
+EMPNO, ENAME,  DNAME
+FROM EMP, DEPT
+WHERE EMP.DEPTNO = DEPT.DEPTNO;
+
+
+SELECT DISTINCT DEPTNO
+FROM EMP;
+SELECT DISTINCT DEPTNO
+FROM DEPT;
+
+SELECT
+    *
+FROM DEPT;
+
+SELECT
+E.EMPNO, E.ENAME, D.DNAME, E.DEPTNO
+FROM EMP E, DEPT D
+WHERE E.DEPTNO = D.DEPTNO;
+
+SELECT
+E.EMPNO, E.ENAME, D.DNAME, E.DEPTNO
+FROM EMP E JOIN DEPT D
+ON (E.DEPTNO = D.DEPTNO);
+
+/* EQUI 조인 표현식
+SELECT T1.COL1, T1.COL2, T2.COL3, T2.COL4
+FROM TABLE T1, TABLE T2
+WHERE T1.PRIMARYKEY = T2.FOREIGNKEY
+*/
+
+-- non-equi join
+SELECT E.ENAME, E.SAL, S.GRADE
+FROM EMP E, SALGRADE S
+WHERE E.SAL >= S.LOSAL AND E.SAL <= S.HISAL;
+
+SELECT E.ENAME, E.SAL, S.GRADE
+FROM EMP E, SALGRADE S
+WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL;
+SELECT *
+FROM SALGRADE;
+
+-- 3중조인: 테이블 3개를 조인
+-- 사원번호, 이름, 부서번호, 급여 ,급여 등급을 출력 
+-- E.EMPNO, E.ENAME, E.DEPTNO, D. DNAME, E.SLA, S.SALGRADE
+
+SELECT E.EMPNO, E.ENAME, E.DEPTNO, D.DNAME, E.SAL, S.GRADE
+FROM EMP E, DEPT D, SALGRADE S
+WHERE E.DEPTNO = D.DEPTNO AND E.SAL BETWEEN S.LOSAL AND S.HISAL;
