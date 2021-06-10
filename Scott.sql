@@ -1559,3 +1559,462 @@ WHERE DEPTNO = 30
 FOR UPDATE
 ORDER BY EMPNO;
 
+commit;
+
+
+1. 부서번호 30번인 사원들의 이름, 직급,부서번호, 부서위치 출력
+SELECT E.ENAME, E.JOB, E.DEPTNO, D.LOC
+FROM EMP E, DEPT D
+WHERE E.DEPTNO = D.DEPTNO AND D.DEPTNO = 30;
+2. 이름에 'A'가 들어가는 사원이 소속된 부서의 사번,이름,부서번호 출력
+SELECT EMPNO, ENAME, DEPTNO
+FROM EMP
+WHERE EMPNO IN(SELECT EMPNO FROM EMP WHERE ENAME LIKE '%A%');
+3. 평균보다 적은 급여를 받는 사원의 사번, 이름, 급여 출력
+SELECT EMPNO, ENAME, SAL
+FROM EMP
+WHERE SAL < (SELECT AVG(SAL) FROM EMP)
+ORDER BY 3, 2; -- 정렬은 앞의 것이 첫 번째 기준이되고 뒤의 것이 두 번째 기준이 된다.
+
+4. 'CLARK'이 매니저인 사원의 사번, 이름, 급여, 부서번호 출력
+SELECT EMPNO, ENAME, SAL, DEPTNO, MGR
+FROM EMP
+WHERE MGR IN(SELECT EMPNO FROM EMP WHERE ENAME = 'CLARK');
+5. 급여가 3000이상인 사원이 소속된 부서의 사번, 이름 ,급여, 부서번호 출력
+SELECT EMPNO, ENAME, SAL, DEPTNO
+FROM EMP
+WHERE DEPTNO IN(SELECT DEPTNO FROM EMP WHERE SAL > 3000);
+* CREATE TABLE E1 AS SELECT * FROM EMP; 생성
+CREATE TABLE E1 AS SELECT * FROM EMP;
+6. E1 테이블에 EMPNO =8000, ENAME='QUEEN', SAL=4000 을 삽입하시오.
+INSERT INTO E1(EMPNO, ENAME, SAL) VALUES(8000, 'QUEEN', 4000);
+7. E1 테이블 서브쿼리를 이용해서 EMP테이블 값을 삽입하시오.
+INSERT INTO E1 SELECT * FROM EMP;
+SELECT * FROM E1;
+
+8. E1 테이블에서 EMPNO = 7369인 사원의 급여를 1500으로, 이름은 JOHNSON으로 수정하시오.
+UPDATE E1 SET SAL = 1500, ENAME = 'JOHNSON' WHERE EMPNO = 7369;
+
+9. E1 테이블에서 ID = 7499인 사원을 삭제 하시오.
+DELETE FROM E1 WHERE EMPNO = 7499;
+10. E1 테이블에서 담당업무(JOB)가 'SALESMAN'인 행을 삭제하시오.
+DELETE FROM E1 WHERE JOB = 'SALESMAN';
+
+
+* 부서명이 SALES인 직원을 삭제 해보자
+
+
+
+DELETE FROM E1 WHERE DEPTNO = (SELECT DEPTNO FROM DEPT WHERE DNAME = 'SALES');
+/*
+--DDL
+-- CREATE, ALTER, DROP, RENAME, TRUNCATE
+-- TABLE, USER, VIEW, SEQUENECE, INDEX, DICTIONARY...
+-- TABLE: 데이터가 저장된 저저장공간을 가진 객체, 사용자가 원하는 데이터를 액세스하기 위한 의미와 속성이 정의된 객체
+-- 제약조건: DB테이블에 입력(수정, 삭제)되는 데이터가 지켜야 하는 규칙
+
+-- DB에 접속한 계정이 자신의 스키마에 테이블을 생성하기 위한
+   *접속한 DB계정에서 CREATE TABLE 시스템 권한이 부여되어 있어야 한다. 
+
+CREATE TABLE 테이블명(
+    컬럼이름1 데이터유형(최대 길이)
+    컬럼이름2  데이터유형 -> 일부 데이터 형은 길이를 지정하지 않아도 된다. 
+   */
+
+   
+CREATE TABLE E1(
+    ID NUMBER(4),
+    SAL NUMBER(7,2),
+    DEPTNO NUMBER(4)
+);
+
+
+--UPDATE, INSERT 문에서 DEFAUSTL 키워드를 이용
+
+--데이터 입력 및 수정 가능
+CREATE TABLE CUST(
+    CID NUMBER(4),
+    NAME VARCHAR2(25),
+    CITY VARCHAR2(10) DEFAULT 'SEOUL',
+    RDATE DATE DEFAULT SYSDATE
+);
+
+INSERT INTO CUST VALUES(10,' KIM', NULL, TO_DATE('20100321', 'YYYYMMDD'));
+INSERT INTO CUST VALUES(20,' KIM', NULL, TO_DATE('20100321', 'YYYYMMDD'));
+INSERT INTO CUST VALUES(30,' KIM', NULL, TO_DATE('20100321', 'YYYYMMDD'));
+SELECT * FROM CUST;
+
+
+-- 서브쿼리 이용해서 테이블을 생성.
+
+CREATE TABLE E2 AS SELECT * FROM EMP;
+CREATE TABLE E3 AS SELECT EMPNO, ENAME, SAL*12 + NVL(COMM,0) AS ANNAL, HIREDATE FROM EMP WHERE DEPTNO=30;
+SELECT*FROM E3;
+
+CREATE TABLE E4(EMPNO, ENAME, ANNAL, HIREDATE) AS SELECT EMPNO, ENAME, SAL*12 + NVL(COMM,0) AS ANNAL, HIREDATE FROM EMP WHERE DEPTNO=30;
+
+--테이블의 구조만 카피
+CREATE TABLE E5 AS SELECT * FROM EMP
+                                WHERE 1=0;
+                                
+SELECT * FROM E5;
+/*무결성 제약 조건
+NOT NULL: NULL 허용하지 않는다. 반드시 데이터 입력
+
+UNIQE: 유일성, 중복을 허락하지 않는다.
+PRIMARY KEY: 기본키 == 행을 구분하는 식별자 컬럼 NOT NULL, UNIQUE 속성을 갖는다.
+
+FOREIGN KEY: 외래키 == 기본키를 참조하는 키, 다른 테이블의 기본키
+
+SUPER KEY: UNIQUE하게 식별되는 모든 조합을 의미
+
+CHECK:입력값의 종류나 범위를 제한하는 것.
+
+USER_CONSTRAINTS
+
+*/
+
+select * from tab;
+
+drop table E1 purge;
+drop table E2 purge;
+drop table E3 purge;
+drop table E4 purge;
+drop table E5 purge;
+
+drop table EMPS8 purge;
+
+CREATE TABLE DEPT01(
+    DEPTNO NUMBER(2),
+    DNAME VARCHAR2(15),
+    LOC VARCHAR2(15),
+    CONSTRAINT DEPT01_DEPTNO_PK PRIMARY KEY(DEPTNO)
+); --PRIMARY KEY는 한 개 이상 가능하다. 
+
+SELECT * FROM DEPT01;
+
+CREATE TABLE DEPT02(
+    DEPTNO NUMBER(2),
+    DNAME VARCHAR2(15),
+    LOC VARCHAR2(15)
+);
+
+DESC DEPT01;
+DESC DEPT02;
+
+--ALTER
+
+ALTER TABLE DEPT02 ADD CONSTRAINT DEPT02_DEPTNO_PK PRIMARY KEY(DEPTNO);
+
+-- ALTER ADD 제약 추가, DROP: 제약 제거
+
+ALTER TABLE DEPT02 DROP PRIMARY KEY;
+
+DESC DEPT02;
+
+-- UNIQUE: 중복 불가 옵션..
+CREATE TABLE DEPT03(
+        DEPTNO NUMBER(2),
+        DNAME VARCHAR(15) UNIQUE,
+        LOC VARCHAR2(15)
+);
+
+INSERT INTO DEPT03 VALUES (11, '기획', '구로');
+INSERT INTO DEPT03 VALUES (12, '기획', '구로');-- UNIQE 무결성 제약 위반
+INSERT INTO DEPT03 VALUES (13, 'NULL', '종로');
+INSERT INTO DEPT03 VALUES (14, 'NULL', '종로');
+INSERT INTO DEPT03 VALUES (15, NULL, '강남');
+INSERT INTO DEPT03 VALUES (16, NULL, '강남');--NULL 값은 UNIQUE 제약 조건에 위배되지 않음
+
+SELECT * FROM DEPT03;
+
+
+-- Check 옵션
+
+CREATE TABLE EM1(
+    EMPNO NUMBER(4) CONSTRAINT EM1_EMPNO_PK PRIMARY KEY,
+    ENAME VARCHAR2(15),
+    SAL NUMBER(7, 2) CONSTRAINT EM1_SAL_UQ CHECK
+    (SAL BETWEEN 500 AND 5000)
+);
+
+INSERT INTO EM1 VALUES(111, 'HGD', 3000);
+INSERT INTO EM1 VALUES(112, 'LSS', 13000); --CHECK 제약 위반
+INSERT INTO EM1 VALUES(113, 'AAA', NULL); --NULL은 허용
+
+SELECT * FROM EM1;
+
+CREATE TABLE EM2(
+    EMPNO NUMBER(4) CONSTRAINT EM2_EMPNO_PK PRIMARY KEY,
+    ENAME VARCHAR2(15),
+    LOC VARCHAR2(20) CONSTRAINT EM2_LOC_PK CHECK
+                        (LOC IN('서울', '부산', '대구', '대전', '울산'))
+);
+
+
+INSERT INTO EM2 VALUES (111, 'HGD', '서울');
+INSERT INTO EM2 VALUES (111, 'LSS', '진도'); -- CHECK 조건 위배
+
+
+CREATE TABLE EM3(
+    EMPNO NUMBER(4) CONSTRAINT EM2_NO_PK PRIMARY KEY,
+    ENAME VARCHAR2(15),
+    LOC VARCHAR2(15) CONSTRAINT EM2_LOC_PK CHECK
+                                            (IN ('서울','대전', '대구',))
+);
+
+/*뷰(권장)
+뷰란 쿼리의 단축이나 보안을 위해서 사용하는 물리적 테이블을 기반으로 생성한 가상의 테이블이다.
+
+--SYSTEM으로 접속해서
+CREATE VIEW TO SCOTT;
+*/
+SELECT * FROM TAB;
+DROP TABLE DEPT01 PURGE;
+DROP TABLE DEPT02 PURGE;
+DROP TABLE DEPT03 PURGE;
+
+CREATE TABLE EMP_COPY AS SELECT * FROM EMP;
+
+CREATE VIEW EV01 AS SELECT EMPNO, ENAME, DEPTNO FROM EMP_COPY WHERE DEPTNO = 30;
+
+SELECT * FROM EV01; -- 쿼리의 단축/쿼리의 상세한 내용을 감추는 보안효과까지 같는다.
+
+
+INSERT INTO EV01 VALUES(2222, 'BBBB', 99); -- DEPTNO가 30이 아니어서 
+INSERT INTO EV01 VALUES(2222, 'AAAA', 30);
+UPDATE EV01 SET DEPTNO=50 WHERE ENAME='AAAA';
+
+DELETE FROM EV01 WHERE ENAME='BLAKE';
+
+SELECT * FROM EMP_COPY;
+
+CREATE VIEW EV02 -- 그룹 함수 사용이 가능하나, 입력은 불가능 
+AS SELECT DEPTNO, SUM(SAL) SUM_SAL
+FROM EMP_COPY GROUP BY DEPTNO;
+
+SELECT * FROM EV02 ORDER BY 1;
+
+CREATE VIEW EV_JOIN AS SELECT E.EMPNO, E.ENAME, D.DNAME FROM EMP E, DEPT D WHERE E.DEPTNO = D.DEPTNO;
+
+SELECT * FROM EV_JOIN; -- JOIN을 사용해서 VIEW 생성 가능
+
+-- 제거 DROP
+
+DROP VIEW EV01;
+DROP VIEW EV02;
+DROP VIEW EV_JOIN;
+SELECT * FROM TAB;
+
+--VIEW의 내용 보기
+SELECT VIEW_NAME, TEXT FROM user_views;
+-- View 수정
+CREATE OR REPLACE VIEW EV01 AS SELECT E.EMPNO, E.ENAME, D.LOC FROM EMP E, EPT D WHEREE.DEPTNO = D.DEPTNO;
+
+SELECT * FROM EV01;
+ 
+--WITH CHECK OPTION, DEPTNO 변경불가, 나머지는 가능 
+CREATE OR REPLACE VIEW EV02 AS SELECT EMPNO, ENAME, DEPTNO FROM EMP_COPY WHERE DEPTNO=20 WITH CHECK OPTION;
+
+UPDATE EV02 SET DEPTNO=50 WHERE ENAME='SMITH';
+
+--WITH READ ONLY
+CREATE OR REPLACE VIEW EV03 AS SELECT EMPNO, ENAME, DEPTNO FROM EMP_COPY WHERE DEPTNO=20 WITH READ ONLY;
+UPDATE EV03 SET DEPTNO=20 WHERE ENAME='SMITH';
+
+SLECT EV03 
+
+
+SELECT * FROM TAB;
+
+/* SEQUENCE 시퀀스: 자동 증가 번호를 생성
+CREATE SEQUENCE 시퀀스명;
+OPTION 
+INCREMENT BY 1 -> 1씩 증가
+START WITH N -> N부터 시작
+NOMAXVALUE -> 범위 제한 없음
+MAXVALUE N -> 최대 N까지 (N초과시 처음으로)
+NOCYCLE -> 반복 없음
+CYCLE -> 최댓값에 다다르면 다시 시작번호로 돌아감.
+CACHE 10 -> 한번에 10개의 번호를 생성, DEFAULT가 20개.
+NOCACHE 그때그때 번호를 생성
+*/
+
+
+CREATE SEQUENCE TESTSEQ;// 1부터 시작 1씩 증가.
+
+DROP SEQUENCE TESTSEQ;
+
+
+-- SEQUENCE 연습
+
+CREATE SEQUENCE SEQ1 
+    INCREMENT BY 15 START WITH 100;
+    SELECT SEQ1.NEXTVAL FROM DUAL;
+
+
+CREATE TABLE EM01 AS SELECT EMPNO, ENAME FROM EMP WHERE 1=0;
+SELECT * FROM EM01;
+
+CREATE SEQUENCE  EMSEQ;
+INSERT INTO EM01 VALUES (EMSEQ.NEXTVAL, 'HGD');
+INSERT INTO EM01 VALUES (EMSEQ.NEXTVAL, 'LSS');
+INSERT INTO EM01 VALUES (EMSEQ.NEXTVAL, 'KKC');
+COMMIT;
+
+SELECT * FROM EM01;
+
+
+
+
+
+
+
+
+SELECT VIEW_NAME, TEXT FROM user_views;
+
+
+/* INDEX
+검색속도 향상을 위해사용 
+오라클에서는 B* TREE 방식 사용. 
+수정 입력이 빈법하면 효율성이 감소
+
+인덱스가 필요한 경우                인덱스가 필요없는 경우
+-----------------------------------------
+행수가 많을 때                     행수가 적을때
+WHERE절 검색빈도가 높을 때          WHERE절 검색빈도가 낮을 때
+검색결과 데이터 2~4% 정도           검색결과 데이터가 10~15%
+자주사용되는: JOIN절                빈번한 DML이 일어날대
+NULL이 포함하는 컬럼이 많을때        입력수정이 빈번할 때
+*/
+
+CREATE TABLE E2 AS SELECT * FROM EMP;
+INSERT INTO E2 SELECT * FROM E2;
+SELECT * FROM E2;
+SELECT COUNT(EMPNO) FROM E2;
+
+SET TIMING ON;
+
+
+SELECT DISTINCT EMPNO, ENAME FROM E2 WHERE ENAME = 'KING';
+
+CREATE INDEX IDX01 ON E2(EMPNO);
+
+SELECT DISTINCT EMPNO, ENAME FROM E2 WHERE UPPER(ENAME) = 'KING';
+
+CREATE INDEX IDX_01 ON E2(EMPNO);
+
+DROP INDEX IDX_O1;
+DROP INDEX IDX_O2;
+
+
+DESC TAB;
+DROPT TABLE E2 PURGE;
+
+--TRUNCTATE: 가지를 잘라내는 명령, 빠른 삭제를 위함.
+SELECT * FROM EM01;
+DELETE FROM EM01;
+ROLLBACK;
+TRUNCATE TABLE EM01;
+ROLLBACK;
+
+/*DCL:DATA CONTROL LANGUAGE
+GRANT: 권한 부여 REVOKE: 권한 회수
+1. 계정 만들기: CREATE USER 유저명 IDENTEFIED BY 암호
+2. 권한 부여: GRANT SESSION, CREAT 
+3. 롤(ROLE)권한의 부여(여러가지 권한을 묶어서 하나의 권한으로 만든 것, 권한 묶음)
+            GRANT CONNECT, RESOURCE TO 유저명
+4. 권한 제거: REVOKE 권한 FROM 대상;
+5. 계정제거: DROP USER 유저명;
+
+권한의 종류
+1. CREATE USER <-> DROP USER;
+2. CREATE TABLE <-> DROP TABLE;
+3. QUERY REWRITE - 질의를 재작성할 수 있는 권한 
+4. BACKUP 테이블 임의의 테이블을 백업할 수 있는 권한
+5. CREATE SESSION - 접속 권한
+6. CREATE VIEW -VIEW 생성 권한
+7. CREATE SEQUENCE - SEQUENCE 생성권한
+8. CREATE PROCEDURE -
+
+오라클의 자료형 
+CHAR(N): 1~2000바이트 사이의 문자의 크기가 고정된 문장: 주민번호, 전화번호, 우편번호 등
+VARCHAR2(N): 1~4000바이트 사이의 가변 문장, STRING 
+NVARCHAR2(N): 1~4000바이트 국가별 국가 집합에 따른 크기의 
+NUMBER(N):N자리수 정수, INT
+ROWID: 행주소 65진수 문자: 시스템 내부에서 레코드의 고유
+ROWNUM: 쿼리의 결과에 순서를 붙여서 출력한다. 소수점 2자리
+BLOB: BINARY LARGE OBJECT  대용량 문자 파일 최대 4기가
+CLOB: CHARACTER LARGE OBJECT  대용량 문자 파일 최대 4기가
+BFILE: BIANRY DATE를 파일로 저장 최대 4기가
+DATE: 날짜 -> SYSDATE; STRING
+TIMESTAMP(N): 날짜 형식 지정
+INTERVAL YEAR TO MONTH: 기간을 저장
+
+SELECT 컬럼
+FROM 테이블
+WHERE 조건
+GROUP BY 그룹함수가 나올 대 
+HAVING 그룹함수 조건
+ORDER BY
+
+JOIN
+INNER JOIN : 조인하는 두 테이블의 값에 해당하는 값만 출력
+    EQUI JOIN: PRIMARY KEY = FOREIGN KEY
+    NON EQUI JOIN: 검색 조건이 맞을 때 EX) SALGRADE
+OUTER JOIN : 조인하는 테이블의 값이 매칭되지 않는 값도 출력
+
+서브 쿼리
+
+DML(INSERT, UPDATE, DELETE)
+
+PL/SQL 언어: 오라클이 젝오하는 오라클 데이터 베이시서버의 내장 Pl/SQL PACKAGE를 이용하여 프로그램이 하는 언어 SQL DEVELOPER를 이용하여 작성
+* SQL: 데이터 베이스 서버에 요구하여 '데이터 처리'를 수행하는 명령어
+* PL/SQL: C, JAVA, ASP, JSP, PHP와 비슷한 기능을 제공한다. 오라클에서 제공하는 자체 프로그램 언어 
+특징: 블록구조로 다수의 SQL문을 한번에 ORACLE DB로 보내 처리하므로 수행 속도를 향상. 모듈화 가능. 큰 블럭 안에 소블럭 선언 가능. VARIABLE, CONSTANT, CURSOR, EXCEPTION을 정의하고 SQL 문장과 PROCEDURE 문장에 사용한다.
+
+PL/SQL 블럭 구조:
+1. 선언부: 변수, 상수 등 선언 ( 생략가능)
+2.실행부: SQL 반복문, 조건문 실행 BEGIN 시작, END;로 끝. 생략불가
+3. 예외 처리: 예외처리. 생략가능.
+
+*/
+
+SHOW ALL;
+SET SERVEROUTPUT ON;
+
+DECLARE
+    f_name varchar2(30);
+    l_name varchar2(15);
+BEGIN
+    SELECT ENAME INTO f_name
+    FROM EMP
+    WHERE EMPNO = 7369;
+    
+    DBMS_OUTPUT.PUT_LINE(
+        'The First Name of the Emp is '||f_name);
+        
+    f_name := f_name||'--a';
+    DBMS_OUTPUT.PUT_LINE(f_name);
+END;
+
+--함수 작성
+
+CREATE FUNCTION compute_tax3(sal in number)
+    return number
+IS
+BEGIN
+    if sal < 3000 then
+        return sal*0.15;
+    else return sal*0.33;
+    end if;
+END;
+/
+
+select * from tab;
+
+SELECT ENAME, SAL, compute_tax3(SAL) AS TAX_AMOUNT
+FROM EMP
+WHERE DEPTNO=10;
+
+
