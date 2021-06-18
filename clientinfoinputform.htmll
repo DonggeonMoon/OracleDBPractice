@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>고객정보 입력받기</title>
+<style>
+td {
+
+}
+</style>
+<script>
+function test(){
+	var name = document.getElementById("name").value;
+	var gender = document.getElementById("gender").value;
+	var email = document.getElementById("email").value;
+	var birthyear = document.getElementById("birthyear").value;
+
+	var obj = new ActiveXObject("WScript.Shell");
+	var info = "cms.exe"+" "+name+" "+gender+" "+email+" "+birthyear;
+	obj.Run(info, 1, true);
+	document.write("고객 정보 입력을 완료하였습니다. <br>이름: "+name+"<br>성별: "+gender+"<br>이메일: "+email+"<br>생년:"+ birthyear);	
+}
+</script>
+</head>
+<body style="color=red;">
+<fieldset>
+<form>
+<table>
+<tr><td style="color:read;">이름:</td><td><input id="name" type="text" ></td></tr>
+<tr><td>성별:</td><td>남<input id="gender" type="radio" value="M"> 여<input type="radio" name="gender"  value="F"></td></tr>
+<tr><td>이메일:</td><td ><input id="email"  type="email" ></td></tr>
+<tr><td>생년:</td><td><input id="birthyear" type="text"></td></tr>
+<tr><td></td><td style="float:right;"><input id= "submit" type="submit" onclick="test()"></td></tr>
+</table>
+</form>
+</fieldset>
+</body>
+</html>
